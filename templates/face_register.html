@@ -1,0 +1,136 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Registration</title>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: 0 auto; padding: 20px; }
+        video, canvas { border: 2px solid #007bff; border-radius: 10px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        #faceCount { font-size: 24px; color: #007bff; }
+    </style>
+</head>
+<body>
+    <h1>📸 Register Your Face</h1>
+    <p>Look straight at camera. Press SPACE on good face shot (5 times).</p>
+    <div>
+        <video id="video" width="640" height="480" autoplay muted></video>
+    </div>
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+    <br>
+    <button id="captureBtn" disabled>Capture Face</button>
+    <div id="status" class="status"></div>
+    
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const status = document.getElementById('status');
+        const captureBtn = document.getElementById('captureBtn');
+        let stream = null;
+        let captures = 0;
+
+        navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+            stream = s;
+            video.srcObject = s;
+            video.onloadedmetadata = () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                detectFaces();
+            };
+        }).catch(e => status.innerHTML = '<div class="error">Camera error: ' + e + '</div>');
+
+        function detectFaces() {
+            if (video.readyState === 4) {
+                ctx.drawImage(video, 0, 0);
+                
+                // Draw crosshair
+                ctx.strokeStyle = '#00ff00';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(canvas.width/2, 0);
+                ctx.lineTo(canvas.width/2, canvas.height);
+                ctx.moveTo(0, canvas.height/2);
+                ctx.lineTo(canvas.width, canvas.height/2);
+                ctx.stroke();
+                
+                // Ready when centered face-like area
+                captureBtn.disabled = false;
+                
+                requestAnimationFrame(detectFaces);
+            }
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                captureFace();
+            }
+        });
+
+        captureBtn.onclick = captureFace;
+
+        async function captureFace() {
+            ctx.drawImage(video, 0, 0);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const descriptor = extractDescriptor(imageData);
+            
+            status.innerHTML = '<div class="status">Registering...</div>';
+            captureBtn.disabled = true;
+            
+            try {
+                const resp = await fetch('/register_face', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({descriptor: Array.from(descriptor)})
+                });
+                
+                const result = await resp.json();
+                if (result.success) {
+                    captures++;
+                    status.innerHTML = `<div class="success">${result.message} (${captures}/5)</div>`;
+                    if (captures >= 5) {
+                        alert('Registration complete! Close and test attendance.');
+                    } else {
+                        setTimeout(() => captureBtn.disabled = false, 1000);
+                    }
+                } else {
+                    status.innerHTML = `<div class="error">${result.message}</div>`;
+                    captureBtn.disabled = false;
+                }
+            } catch(e) {
+                status.innerHTML = `<div class="error">Error: ${e}</div>`;
+                captureBtn.disabled = false;
+            }
+        }
+
+        function extractDescriptor(imageData) {
+            // 32x32 center grayscale normalized (matches backend)
+            const centerX = Math.floor(canvas.width / 2);
+            const centerY = Math.floor(canvas.height / 2);
+            const size = 32;
+            
+            const descriptor = new Float32Array(size * size);
+            let idx = 0;
+            
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    const pxX = centerX - 16 + x;
+                    const pxY = centerY - 16 + y;
+                    if (pxX >= 0 && pxX < canvas.width && pxY >= 0 && pxY < canvas.height) {
+                        const i = (Math.floor(pxY) * canvas.width + Math.floor(pxX)) * 4;
+                        const gray = (imageData.data[i] + imageData.data[i+1] + imageData.data[i+2]) / 3 / 255;
+                        descriptor[idx++] = gray;
+                    }
+                }
+            }
+            return descriptor;
+        }
+    </script>
+</body>
+</html>
+

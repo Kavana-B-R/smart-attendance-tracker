@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Tests - Smart Attendance Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+                SmartAttend
+            </a>
+            <ul class="nav-links">
+                <li><a href="/teacher/dashboard">Dashboard</a></li>
+                <li><a href="/teacher/videos/manage">Videos</a></li>
+                <li><a href="/teacher/tests/manage" class="active">Tests</a></li>
+            </ul>
+            <div class="user-info">
+                <a href="/logout" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Manage Tests Page -->
+    <div class="dashboard-page">
+        <div class="container">
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    <h1>Manage MCQ Tests</h1>
+                    <p>View test results and manage your assessments</p>
+                </div>
+                <a href="/teacher/test/create" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create New Test
+                </a>
+            </div>
+
+            <!-- Tests Table -->
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Test Title</th>
+                                <th>Topic</th>
+                                <th>Subject</th>
+                                <th>Attempts</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for test in tests %}
+                            <tr>
+                                <td>{{ test.title }}</td>
+                                <td><span class="test-topic">{{ test.topic }}</span></td>
+                                <td>{{ test.subject_name }}</td>
+                                <td>{{ test.attempts }}</td>
+                                <td>{{ test.created_at.strftime('%Y-%m-%d') if test.created_at else '' }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-secondary);">No tests created yet</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <a href="/teacher/dashboard" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot-widget">
+        <button class="chatbot-toggle"><i class="fas fa-robot"></i></button>
+        <div class="chatbot-container">
+            <div class="chatbot-header">
+                <span class="chatbot-title"><i class="fas fa-robot"></i> AI Assistant</span>
+                <button class="chatbot-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chatbot-messages">
+                <div class="message bot">Managing tests? I can help you understand test results!</div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" placeholder="Type your message...">
+                <button><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+

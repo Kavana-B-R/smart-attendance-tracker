@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Create Test</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav>
+        <a href="/teacher/tests" class="back-btn">
+            ← Tests
+        </a>
+    </nav>
+
+    <div class="container">
+        <h1>{% if test %}Edit{% else %}Create{% endif %} Test</h1>
+
+        <form method="POST" class="card" style="max-width: 800px;">
+            <div class="form-group">
+                <label>Title</label>
+                <input name="title" value="{{ test.title if test else '' }}" required>
+            </div>
+            <div class="form-group">
+                <label>Topic</label>
+                <input name="topic" value="{{ test.topic if test else '' }}" required>
+            </div>
+            <div class="form-group">
+                <label>Subject ID</label>
+                <select name="subject_id">
+                    <option value="">Select Subject</option>
+                    {% for subject in subjects %}
+                    <option value="{{ subject.id }}" {% if test and test.subject_id == subject.id %}selected{% endif %}>{{ subject.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <h3>Questions (Add up to 10)</h3>
+            <div id="questions-container">
+                {% for question in questions %}
+                <div class="question-item">
+                    <div class="form-group">
+                        <label>Question {{ loop.index }}</label>
+                        <textarea name="question_{{ loop.index }}" rows="3" required>{{ question.question }}</textarea>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        <div>
+                            <label>A</label>
+                            <input name="option_a_{{ loop.index }}" value="{{ question.option_a }}" required>
+                        </div>
+                        <div>
+                            <label>B</label>
+                            <input name="option_b_{{ loop.index }}" value="{{ question.option_b }}" required>
+                        </div>
+                        <div>
+                            <label>C</label>
+                            <input name="option_c_{{ loop.index }}" value="{{ question.option_c }}" required>
+                        </div>
+                        <div>
+                            <label>D</label>
+                            <input name="option_d_{{ loop.index }}" value="{{ question.option_d }}" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Correct Answer (A/B/C/D)</label>
+                        <input name="correct_{{ loop.index }}" value="{{ question.correct_answer }}" maxlength="1" required>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" onclick="addQuestion()" class="btn btn-secondary" style="margin-bottom: 20px;">
+                + Add Question
+            </button>
+
+            <button type="submit" class="btn btn-primary">
+                {% if test %}Update{% else %}Create{% endif %} Test
+            </button>
+        </form>
+    </div>
+
+    <script>
+        let questionCount = {{ (questions|length or 0) + 1 }};
+        function addQuestion() {
+            if (questionCount > 10) {
+                alert('Maximum 10 questions allowed');
+                return;
+            }
+            const container = document.getElementById('questions-container');
+            const div = document.createElement('div');
+            div.className = 'question-item';
+            div.innerHTML = `
+                <div class="form-group">
+                    <label>Question ${questionCount}</label>
+                    <textarea name="question_${questionCount}" rows="3" required></textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                    <div>
+                        <label>A</label>
+                        <input name="option_a_${questionCount}" required>
+                    </div>
+                    <div>
+                        <label>B</label>
+                        <input name="option_b_${questionCount}" required>
+                    </div>
+                    <div>
+                        <label>C</label>
+                        <input name="option_c_${questionCount}" required>
+                    </div>
+                    <div>
+                        <label>D</label>
+                        <input name="option_d_${questionCount}" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Correct Answer (A/B/C/D)</label>
+                    <input name="correct_${questionCount}" maxlength="1" required>
+                </div>
+                <button type="button" class="btn btn-delete" onclick="this.parentElement.remove();">Delete Question</button>
+            `;
+            container.appendChild(div);
+            questionCount++;
+        }
+    </script>
+</body>
+</html>
+

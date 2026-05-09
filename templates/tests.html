@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tests - Smart Attendance Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <nav class="navbar">
+        <div class="container">
+            <a href="/student/dashboard" class="logo">
+                <i class="fas fa-graduation-cap"></i> SmartAttend
+            </a>
+            <div class="nav-buttons">
+                <a href="/student/dashboard" class="btn btn-secondary">Dashboard</a>
+                <a href="/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-page">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Available Tests</h1>
+                <p>Take practice tests and track your progress</p>
+            </div>
+
+            <div class="card">
+                <div class="video-grid">
+                    {% for test in tests %}
+                    <div class="video-card test-card">
+                        <div class="video-thumbnail test-thumbnail">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <div class="video-info">
+                            <h4>{{ test.title }}</h4>
+                            <span class="video-topic">{{ test.subject_name }} - {{ test.topic }}</span>
+Recent
+
+                            <a href="/test/{{ test.id }}" class="btn btn-primary">
+                                <i class="fas fa-play"></i> Take Test
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>No Tests Available</h3>
+                        <p>Check back later for new tests.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

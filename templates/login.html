@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Smart Attendance Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation"></div>
+
+    <!-- Login Page -->
+    <div class="login-page">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="login-icon"><i class="fas fa-school"></i></div>
+                    <h2>Welcome Back</h2>
+                    <p>Select your login type to continue</p>
+                </div>
+
+                <div class="login-type-selector">
+                    <button class="login-type-btn active" onclick="selectLoginType('student')">
+                        <i class="fas fa-user-graduate" style="font-size: 1.5rem;"></i>
+                        Student
+                    </button>
+                    <button class="login-type-btn" onclick="selectLoginType('teacher')">
+                        <i class="fas fa-chalkboard-teacher" style="font-size: 1.5rem;"></i>
+                        Teacher
+                    </button>
+                </div>
+
+                <div id="loginFormContainer">
+                    <!-- Form will be loaded here -->
+                </div>
+
+                <div class="login-footer">
+                    <a href="/"><i class="fas fa-arrow-left"></i> Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedType = 'student';
+
+        function selectLoginType(type) {
+            selectedType = type;
+            
+            // Update button styles
+            document.querySelectorAll('.login-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Load appropriate form
+            loadLoginForm(type);
+        }
+
+        function loadLoginForm(type) {
+            const container = document.getElementById('loginFormContainer');
+            
+            if (type === 'student') {
+                container.innerHTML = `
+                    <form action="/student/login" method="POST">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Username</label>
+                            <input type="text" name="username" placeholder="Enter your username" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-lock"></i> Password</label>
+                            <input type="password" name="password" placeholder="Enter your password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary login-btn">
+                            <i class="fas fa-sign-in-alt"></i> Login as Student
+                        </button>
+                    </form>
+                `;
+            } else {
+                container.innerHTML = `
+                    <form action="/teacher/login" method="POST">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Username</label>
+                            <input type="text" name="username" placeholder="Enter your username" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-lock"></i> Password</label>
+                            <input type="password" name="password" placeholder="Enter your password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary login-btn">
+                            <i class="fas fa-sign-in-alt"></i> Login as Teacher
+                        </button>
+                    </form>
+                `;
+            }
+        }
+
+        // Load student form by default
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLoginForm('student');
+        });
+    </script>
+</body>
+</html>
+

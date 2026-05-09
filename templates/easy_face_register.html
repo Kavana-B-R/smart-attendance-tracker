@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Easy Face Registration</title>
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <style>
+        body { font-family: Arial; text-align: center; max-width: 800px; margin: auto; padding: 20px; }
+        video { width: 400px; height: 300px; border: 2px solid #007bff; border-radius: 10px; }
+        #status { margin: 20px; padding: 15px; border-radius: 5px; font-weight: bold; font-size: 18px; }
+        button { padding: 15px 30px; font-size: 18px; margin: 10px; cursor: pointer; border: none; border-radius: 5px; background: #007bff; color: white; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        canvas { display: none; }
+        .loading { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+    </style>
+</head>
+<body>
+    <h1>📸 Easy Face Registration for Student1</h1>
+    <p>1. Click <strong>"Load AI"</strong> (downloads models ~10MB)<br>
+       2. Allow camera<br>
+       3. Click <strong>"Register My Face"</strong> → AI auto-detects → saves</p>
+    
+    <video id="video" autoplay muted playsinline></video>
+    <br>
+    <button onclick="loadModels()">🚀 Load AI Models</button>
+    <button onclick="registerFace()" id="registerBtn" disabled>📱 Register My Face</button>
+    
+    <div id="status" class="loading">Ready to load AI...</div>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const status = document.getElementById('status');
+        const registerBtn = document.getElementById('registerBtn');
+
+        let modelsLoaded = false;
+        let stream = null;
+
+        async function loadModels() {
+            status.textContent = '🔄 Loading AI models (5-10s)...';
+            status.className = 'loading';
+            
+            try {
+                // Load models
+                await faceapi.nets.tinyFaceDetector.loadFromUri('/static/models');
+                await faceapi.nets.faceLandmark68Net.loadFromUri('/static/models');
+                await faceapi.nets.faceRecognitionNet.loadFromUri('/static/models');
+                
+                modelsLoaded = true;
+                status.textContent = '✅ AI loaded! Starting camera...';
+                status.className = 'success';
+                registerBtn.disabled = false;
+                await startVideo();
+            } catch (err) {
+                status.textContent = '❌ AI load failed: ' + err.message;
+                status.className = 'error';
+            }
+        }
+
+        async function startVideo() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480, facingMode: 'user' } 
+                });
+                video.srcObject = stream;
+                video.onloadedmetadata = () => {
+                    status.textContent = '✅ Camera ready! Click Register.';
+                };
+            } catch(err) {
+                status.textContent = '🚫 Camera denied/blocked: ' + err.message + '\nCheck HTTPS or browser permissions.';
+                status.className = 'error';
+            }
+        }
+
+        async function registerFace() {
+            if (!modelsLoaded || !video.videoWidth) {
+                status.textContent = 'Wait for AI & camera ready.';
+                return;
+            }
+
+            registerBtn.disabled = true;
+            status.textContent = '👀 Detecting face (look straight)...';
+            status.className = 'loading';
+            
+            // Detect face
+            const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+                .withFaceLandmarks().withFaceDescriptor();
+            
+            if (!detections) {
+                status.textContent = '😶 No face detected. Try better lighting/position.';
+                status.className = 'error';
+                registerBtn.disabled = false;
+                return;
+            }
+            
+            // Draw detection box for fun
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            const box = detections.detection.box;
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(box.x, box.y, box.width, box.height);
+            
+            // Get 128d descriptor
+            const descriptor = Array.from(detections.descriptor);
+            
+            // Save to server
+            try {
+                const response = await fetch('http://127.0.0.1:5000/register_face', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({descriptor: descriptor})
+                });
+                
+                const result = await response.json();
+                status.textContent = result.message || 'Success!';
+                status.className = result.success ? 'success' : 'error';
+            } catch(err) {
+                status.textContent = 'Server error: ' + err.message;
+                status.className = 'error';
+            }
+            
+            registerBtn.disabled = false;
+        }
+
+        // Auto-cleanup
+        window.onbeforeunload = () => {
+            if (stream) stream.getTracks().forEach(track => track.stop());
+        };
+    </script>
+</body>
+</html>
+

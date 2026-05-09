@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login - Smart Attendance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #000;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 80px;
+            width: 100%;
+            max-width: 900px;
+        }
+        
+        /* Different Lamp Design - Vintage Lantern Style */
+        .lamp-section {
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .lamp-section:hover { transform: scale(1.05); }
+        
+        .lantern-lamp {
+            width: 80px;
+            height: 180px;
+            position: relative;
+            margin: 0 auto;
+        }
+        .lantern-top {
+            width: 20px;
+            height: 30px;
+            background: #8B4513;
+            margin: 0 auto;
+            border-radius: 3px 3px 0 0;
+            position: relative;
+        }
+        .lantern-top::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            background: #D4AF37;
+            border-radius: 50%;
+        }
+        .lantern-chain {
+            width: 3px;
+            height: 35px;
+            background: #D4AF37;
+            margin: 0 auto;
+        }
+        .lantern-glass {
+            width: 60px;
+            height: 80px;
+            background: rgba(255,255,255,0.1);
+            border: 3px solid #D4AF37;
+            border-radius: 5px;
+            margin: 0 auto;
+            position: relative;
+            transition: all 0.5s;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+        }
+        .lantern-lamp.on .lantern-glass {
+            background: rgba(255,200,100,0.3);
+            box-shadow: 0 0 40px rgba(255,200,100,0.6), inset 0 0 20px rgba(255,200,100,0.3);
+            border-color: #FFD700;
+        }
+        .lantern-flame {
+            width: 12px;
+            height: 20px;
+            background: #222;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.5s;
+        }
+        .lantern-lamp.on .lantern-flame {
+            background: linear-gradient(to top, #FF6B00, #FFD700, #FFFF00);
+            box-shadow: 0 0 25px #FFD700, 0 0 50px #FF6B00;
+            animation: flicker 0.5s infinite alternate;
+        }
+        @keyframes flicker {
+            0% { opacity: 1; transform: translateX(-50%) scale(1); }
+            100% { opacity: 0.8; transform: translateX(-50%) scale(1.1); }
+        }
+        .lantern-base {
+            width: 50px;
+            height: 15px;
+            background: #8B4513;
+            margin: 0 auto;
+            border-radius: 0 0 5px 5px;
+        }
+        .lamp-hint {
+            margin-top: 15px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Login form - right side */
+        .login-form {
+            background: rgba(31,31,61,0);
+            padding: 0;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 350px;
+            border: 0px solid rgba(255,255,255,0);
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.6s ease;
+        }
+        .login-form.show {
+            background: rgba(31,31,61,0.95);
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            max-height: 500px;
+            opacity: 1;
+        }
+        .login-form h2 {
+            color: white;
+            margin-bottom: 5px;
+        }
+        .login-form p {
+            color: #a0a0c0;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label {
+            display: block;
+            color: #a0a0c0;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-login:hover { transform: translateY(-2px); }
+        .links {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .links a {
+            color: #e94560;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        .error {
+            background: rgba(233,69,96,0.2);
+            color: #e94560;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Lamp section - left side (Vintage Lantern) -->
+        <div class="lamp-section">
+            <div class="lantern-lamp" id="lamp" onclick="toggleLamp()">
+                <div class="lantern-top"></div>
+                <div class="lantern-chain"></div>
+                <div class="lantern-glass">
+                    <div class="lantern-flame"></div>
+                </div>
+                <div class="lantern-base"></div>
+            </div>
+            <div class="lamp-hint" id="hint">Click lantern to turn ON</div>
+        </div>
+        
+        <!-- Login form - right side -->
+        <div class="login-form" id="loginForm">
+            <h2>🎓 Student Login</h2>
+            <p>Enter your credentials</p>
+            {% if error %}
+            <div class="error"><i class="fas fa-exclamation-circle"></i> {{ error }}</div>
+            {% endif %}
+            <form action="/student/login" method="POST">
+                <div class="form-group">
+                    <label><i class="fas fa-id-card"></i> Student ID</label>
+                    <input type="text" name="student_id" placeholder="Enter Student ID" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" name="password" placeholder="Enter Password" required>
+                </div>
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+            <div class="links">
+                <a href="/">Home</a> | <a href="/teacher/login">Teacher Login</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        function toggleLamp() {
+            const lamp = document.getElementById('lamp');
+            const hint = document.getElementById('hint');
+            const form = document.getElementById('loginForm');
+            
+            lamp.classList.toggle('on');
+            
+            if (lamp.classList.contains('on')) {
+                hint.innerHTML = '<i class="fas fa-fire" style="color:#FFD700"></i> Light ON!';
+                form.classList.add('show');
+            } else {
+                hint.innerHTML = 'Click lantern to turn ON';
+                form.classList.remove('show');
+            }
+        }
+    </script>
+</body>
+</html>
+
+

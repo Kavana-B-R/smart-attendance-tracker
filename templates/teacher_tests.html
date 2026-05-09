@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Tests Management - Teacher</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav>
+        <a href="/teacher/dashboard" class="back-btn">
+            ← Dashboard
+        </a>
+    </nav>
+
+    <div class="container">
+        <h1>MCQ Tests Management</h1>
+
+        <!-- Create Test Button -->
+        <div class="card" style="margin-bottom: 30px;">
+            <a href="/teacher/tests/create" class="btn btn-success">
+                + Create New Test
+            </a>
+        </div>
+
+        <!-- Tests List -->
+        <div class="card">
+            <h3>All Tests ({{ tests|length }})</h3>
+            <div class="video-grid">
+                {% for test in tests %}
+                <div class="video-card test-card">
+                    <div class="video-thumbnail">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="video-info">
+                        <h4>{{ test.title }}</h4>
+                        <span class="video-topic">{{ test.topic }}</span>
+                        <p>Questions: {{ test.question_count }} | Attempts: {{ test.attempts }}</p>
+                        <p>Avg Score: {{ "%.1f"|format(test.avg_score * 100) }}%</p>
+                        <div style="display: flex; gap: 10px;">
+                            <a href="/teacher/tests/{{ test.id }}/detail" class="btn btn-primary">
+                                📊
+                            </a>
+                            <a href="/teacher/tests/{{ test.id }}/edit" class="btn btn-edit">
+                                ✏️ Edit
+                            </a>
+                            <a href="/teacher/tests/{{ test.id }}/delete" class="btn btn-delete" onclick="return confirm('Delete test?')">
+                                🗑️ Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>No Tests Created</h3>
+                    <p>Create your first MCQ test above.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Charts will be loaded in detail pages
+    </script>
+</body>
+</html>
+

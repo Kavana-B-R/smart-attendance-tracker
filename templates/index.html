@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+                SmartAttend
+            </a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <div class="nav-buttons">
+                <a href="/student/login" class="btn btn-secondary">Student Login</a>
+                <a href="/teacher/login" class="btn btn-primary">Teacher Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Smart Attendance Tracking with <span>AI-Powered Features</span></h1>
+                    <p>Revolutionize your classroom management with face recognition attendance, video lectures, MCQ assessments, and real-time activity monitoring.</p>
+                    
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-user-graduate"></i></div>
+                            <span>Face Recognition Attendance</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-video"></i></div>
+                            <span>Video Lecture Management</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-clipboard-check"></i></div>
+                            <span>MCQ Assessment System</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                            <span>AI Chatbot Assistant</span>
+                        </div>
+                    </div>
+
+                    <div class="hero-buttons">
+                        <a href="/teacher/login" class="btn btn-primary">
+                            <i class="fas fa-chalkboard-teacher"></i> Teacher Portal
+                        </a>
+                        <a href="/student/login" class="btn btn-secondary">
+                            <i class="fas fa-user-graduate"></i> Student Portal
+                        </a>
+                    </div>
+                </div>
+
+                <div class="hero-visual">
+                    <div class="dashboard-preview">
+                        <div class="dashboard-header">
+                            <span class="dashboard-title">Live Dashboard</span>
+                            <i class="fas fa-chart-line" style="color: var(--accent);"></i>
+                        </div>
+                        <div class="stat-cards">
+                            <div class="stat-card">
+                                <div class="stat-value">94%</div>
+                                <div class="stat-label">Attendance</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">12h</div>
+                                <div class="stat-label">Screen Time</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">8</div>
+                                <div class="stat-label">Videos Watched</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">85%</div>
+                                <div class="stat-label">Test Score</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" style="padding: 100px 0; background: var(--primary);">
+        <div class="container">
+            <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 60px;">
+                Powerful <span style="color: var(--accent);">Features</span>
+            </h2>
+            
+            <div class="video-grid">
+                <div class="card" style="text-align: center;">
+                    <div class="feature-icon" style="margin: 0 auto 20px; width: 80px; height: 80px; font-size: 2rem; background: rgba(233, 69, 96, 0.2); color: var(--accent); border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-face-smile"></i>
+                    </div>
+                    <h3 style="margin-bottom: 15px;">Face Recognition</h3>
+                    <p style="color: var(--text-secondary);">Automatic attendance marking using advanced face recognition technology. No more proxy attendance!</p>
+                </div>
+
+                <div class="card" style="text-align: center;">
+                    <div class="feature-icon" style="margin: 0 auto 20px; width: 80px; height: 80px; font-size: 2rem; background: rgba(0, 217, 165, 0.2); color: var(--success); border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <h3 style="margin-bottom: 15px;">Screen Time Tracking</h3>
+                    <p style="color: var(--text-secondary);">Monitor login/logout times and track total screen time for each student.</p>
+                </div>
+
+                <div class="card" style="text-align: center;">
+                    <div class="feature-icon" style="margin: 0 auto 20px; width: 80px; height: 80px; font-size: 2rem; background: rgba(255, 193, 7, 0.2); color: var(--warning); border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-tablet-alt"></i>
+                    </div>
+                    <h3 style="margin-bottom: 15px;">Tab Switch Prevention</h3>
+                    <p style="color: var(--text-secondary);">Detect and log tab switching to ensure students stay focused during class sessions.</p>
+                </div>
+
+                <div class="card" style="text-align: center;">
+                    <div class="feature-icon" style="margin: 0 auto 20px; width: 80px; height: 80px; font-size: 2rem; background: rgba(108, 99, 255, 0.2); color: #6c63ff; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <h3 style="margin-bottom: 15px;">Video Lectures</h3>
+                    <p style="color: var(--text-secondary);">Upload and share video lectures. Track who watched and for how long.</p>
+                </div>
+
+                <div class="card" style="text-align: center;">
+                    <div class="feature-icon" style="margin: 0 auto 20px; width: 80px; height: 80px; font-size: 2rem; background: rgba(233, 69, 96, 0.2); color: var(--accent); border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3 style="margin-bottom: 15px;">MCQ Tests</h3>
+                    <p style="color: var(--text-secondary);">Create and take topic-based MCQ tests with instant results and score tracking.</p>
+                </div>
+
+                <div class="card" style="text-align: center;">
+                    <div class="feature-icon" style="margin: 0 auto 20px; width: 80px; height: 80px; font-size: 2rem; background: rgba(0, 217, 165, 0.2); color: var(--success); border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3 style="margin-bottom: 15px;">AI Chatbot</h3>
+                    <p style="color: var(--text-secondary);">24/7 AI assistant to help students and teachers navigate the platform.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="padding: 40px 0; background: var(--secondary); text-align: center; border-top: 1px solid var(--glass-border);">
+        <div class="container">
+            <p style="color: var(--text-secondary);">
+                &copy; 2024 Smart Attendance Tracker. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+

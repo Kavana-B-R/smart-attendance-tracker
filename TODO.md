@@ -1,0 +1,4 @@
+- [ ] Add missing /student/attendance route in app.py
+- [ ] Ensure Attendance page renders templates/student_attendance.html with recent_attendance data
+- [ ] Ensure teacher attendance summary uses same Attendance table
+- [ ] Restart server and verify: student clicks Attendance -> shows page, not 404

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ test.title }} - Smart Attendance Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation"></div>
+
+    <!-- Test Page -->
+    <div class="dashboard-page" style="padding-top: 100px;">
+        <div class="container">
+            <div style="max-width: 800px; margin: 0 auto;">
+                <!-- Test Header -->
+                <div class="card" style="margin-bottom: 30px;">
+                    <h1 style="margin-bottom: 10px;">{{ test.title }}</h1>
+                    <span class="test-topic">{{ test.topic }}</span>
+                    <p style="margin-top: 15px; color: var(--text-secondary);">
+                        <i class="fas fa-question-circle"></i> {{ questions|length }} Questions
+                    </p>
+                </div>
+
+                <!-- Questions -->
+                <form id="testForm">
+                    {% for question in questions %}
+                    <div class="card question-option" data-question-id="{{ question.id }}" style="margin-bottom: 25px;">
+                        <div class="question-number">Question {{ loop.index }}</div>
+                        <p style="font-size: 1.1rem; margin-bottom: 20px; line-height: 1.6;">{{ question.question }}</p>
+                        
+                        <div class="options-grid">
+                            <label class="option-label">
+                                <input type="radio" name="q{{ question.id }}" value="A">
+                                <span><strong>A.</strong> {{ question.option_a }}</span>
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" name="q{{ question.id }}" value="B">
+                                <span><strong>B.</strong> {{ question.option_b }}</span>
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" name="q{{ question.id }}" value="C">
+                                <span><strong>C.</strong> {{ question.option_c }}</span>
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" name="q{{ question.id }}" value="D">
+                                <span><strong>D.</strong> {{ question.option_d }}</span>
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <input type="hidden" id="testId" value="{{ test.id }}">
+
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <a href="/tests" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                        <button type="button" id="submitTestBtn" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Submit Test
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Result Container -->
+                <div id="testResult" style="margin-top: 30px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot-widget">
+        <button class="chatbot-toggle"><i class="fas fa-robot"></i></button>
+        <div class="chatbot-container">
+            <div class="chatbot-header">
+                <span class="chatbot-title"><i class="fas fa-robot"></i> AI Assistant</span>
+                <button class="chatbot-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chatbot-messages">
+                <div class="message bot">Good luck with your test! Read each question carefully.</div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" placeholder="Type your message...">
+                <button><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+

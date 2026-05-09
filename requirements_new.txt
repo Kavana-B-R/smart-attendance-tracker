@@ -1,0 +1,48 @@
+# Smart Attendance Tracker - MongoDB Migration (Python 3.13 compatible)
+
+# Flask Web Framework
+Flask>=2.3.0
+Flask-CORS>=4.0.0
+
+# Database - MongoDB
+pymongo>=4.6.0
+
+# Face Recognition (compatible versions)
+face-recognition
+dlib
+numpy>=1.26.0
+opencv-python-headless>=4.8.0
+pip
+# Image Processing
+Pillow>=10.0.0
+
+# Face Recognition (compatible versions)
+python-dateutil>=2.8.0
+
+# Build tools (auto)
+cmake
+scikit-learn  # for face_recognition deps
+
+# Notes:\n# - Switched to MongoDB for non-users data\n# - Added mysql-connector-python for users\nmysql-connector-python>=8.2.0
+# - Install: pip install -r requirements_new.txt
+# - Run MongoDB locally on port 27017
+face-recognition
+dlib
+numpy>=1.26.0
+opencv-python-headless>=4.8.0
+
+# Image Processing
+Pillow>=10.0.0
+
+# Utilities
+python-dateutil>=2.8.0
+
+# Build tools (auto)
+cmake
+scikit-learn  # for face_recognition deps
+
+# Notes:
+# - Removed old pins causing Python 3.13 build errors (numpy 1.24.3 deprecated ImpImporter).
+# - opencv-python-headless avoids Qt/GUI deps.
+# - Install: pip install -r requirements_new.txt
+# - face_recognition uses latest dlib wheel if available.

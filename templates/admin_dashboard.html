@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav>
+        <a href="/teacher/dashboard" class="back-btn">← Dashboard</a>
+        <a href="/logout" class="btn-logout">Logout</a>
+    </nav>
+
+    <div class="container">
+        <h1>Admin Dashboard - Face Recognition Attendance</h1>
+
+        <div class="dashboard-grid">
+            <!-- Live Camera Feed -->
+            <div class="card full-width">
+                <h3>Live Camera Feed <small>(Real-time recognition)</small></h3>
+                <div id="live-feed-container">
+                    <video id="live-video" autoplay muted width="640" height="480" style="border-radius: 12px;"></video>
+                    <div id="recognition-status" style="margin-top: 10px;">
+                        <span class="status-idle">Ready for attendance...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Registrations -->
+            <div class="card">
+                <h3>Pending Student Registrations ({{ pending|length }})</h3>
+                {% if pending %}
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>USN</th>
+                                <th>Name</th>
+                                <th>Photos</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reg in pending %}
+                            <tr>
+                                <td>{{ reg.usn }}</td>
+                                <td>{{ reg.name }}</td>
+                                <td>{{ reg.encodings.count(',') + 1 if reg.encodings else 0 }}</td>
+                                <td>
+                                    <a href="/admin/approve/{{ reg.id }}" class="btn btn-success btn-sm">Approve</a>
+                                    <a href="/admin/reject/{{ reg.id }}" class="btn btn-danger btn-sm">Reject</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    No pending registrations
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Analytics -->
+            <div class="card">
+                <h3>Attendance Analytics</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <canvas id="attendanceChart"></canvas>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h4>95.2%</h4>
+                            <p>Overall Attendance</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>12</h4>
+                            <p>Late Arrivals Today</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>98%</h4>
+                            <p>Face Match Accuracy</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Export</h4>
+                            <a href="/api/reports?format=excel" class="btn btn-primary">Excel</a>
+                            <a href="/api/reports?format=pdf" class="btn btn-secondary">PDF</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class Settings -->
+            <div class="card">
+                <h3>Class Settings</h3>
+                <a href="/admin/class-settings" class="btn btn-secondary">Manage Slots</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Live feed logic
+        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+            document.getElementById('live-video').srcObject = stream;
+        }).catch(err => {
+            document.getElementById('recognition-status').innerHTML = 'Camera access denied';
+        });
+
+        // Sample chart
+        new Chart(document.getElementById('attendanceChart'), {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                datasets: [{
+                    label: 'Attendance %',
+                    data: [92, 95, 88, 97, 94],
+                    borderColor: '#00d9a5',
+                    tension: 0.4
+                }]
+            }
+        });
+    </script>
+</body>
+</html>
+

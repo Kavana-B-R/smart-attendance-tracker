@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Manage Videos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav>
+        <a href="/teacher/dashboard" class="back-btn btn btn-secondary">
+            ← Back to Dashboard
+        </a>
+    </nav>
+
+    <div class="container">
+        <h1>Video Management</h1>
+        
+        <!-- Upload Form -->
+        <form id="uploadForm" enctype="multipart/form-data" class="upload-card">
+            <h3>Upload New Video</h3>
+            <div class="form-row">
+    <div class="file-input-wrapper">
+            <input type="file" id="videoFile" name="video" accept="video/*,video/mp4,video/avi,video/mov,video/mkv" multiple="false">
+            <label for="videoFile" class="file-btn btn btn-success" style="cursor: pointer !important; pointer-events: all;">
+                📹 Choose Video File
+            </label>
+            <span id="fileName" class="file-name">No file chosen (Click label to select)</span>
+        </div>
+        <script>
+            const videoFileInput = document.getElementById('videoFile');
+            const fileNameSpan = document.getElementById('fileName');
+            const fileLabel = document.querySelector('.file-btn');
+            
+            videoFileInput.addEventListener('change', function(e) {
+                console.log('File changed:', e.target.files);
+                if (e.target.files.length > 0) {
+                    fileNameSpan.textContent = e.target.files[0].name;
+                    fileNameSpan.style.color = '#00d9a5';
+                } else {
+                    fileNameSpan.textContent = 'No file chosen (Click label to select)';
+                    fileNameSpan.style.color = 'var(--text-secondary)';
+                }
+            });
+            
+            fileLabel.addEventListener('click', function() {
+                console.log('Label clicked, triggering input');
+                videoFileInput.click();
+            });
+        </script>
+
+
+                <div class="title-input-wrapper">
+                    <input type="text" id="titleInput" name="title" placeholder="Enter video title...">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary upload-btn">
+                🚀 Upload Video
+            </button>
+        </form>
+
+        <!-- Videos List -->
+        <div class="card">
+            <h3>Videos ({{ videos|length }})</h3>
+            {% for video in videos %}
+            <div class="video-item">
+                <h4>{{ video.title }}</h4>
+                <p>Date: {{ video.upload_date or video.get('upload_date_formatted', 'N/A') or 'N/A' }}</p>
+                <button class="btn btn-edit">✏️ Edit</button>
+                <a href="/video/{{ video.id }}" class="btn btn-view">👁️ View</a>
+                <button onclick="deleteVideo('{{ video.id }}')" class="btn btn-delete" title="Delete Video">🗑️ Delete</button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('uploadForm').onsubmit = async e => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const res = await fetch('/teacher/videos/manage', {method: 'POST', body: formData});
+            const data = await res.json();
+            alert(data.message);
+            location.reload();
+        };
+        
+        async function deleteVideo(id) {
+            if (confirm('Delete this video permanently?')) {
+                try {
+                    const res = await fetch('/teacher/videos/manage', {
+                        method: 'DELETE',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({id: id})
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert('✅ Video deleted!');
+                        location.reload();
+                    } else {
+                        alert('❌ ' + (data.message || 'Delete failed'));
+                    }
+                } catch (err) {
+                    alert('Network error: ' + err);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+

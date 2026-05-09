@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Classes - Smart Attendance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Ensure select dropdown options are always readable */
+        select option {
+            background-color: #ffffff !important;
+            color: #333333 !important;
+        }
+        select option:checked, select option:hover {
+            background-color: #f0f0f0 !important;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+                SmartAttend
+            </a>
+            <ul class="nav-links">
+                <li><a href="/teacher/dashboard">Dashboard</a></li>
+                <li><a href="/teacher/videos/manage">Videos</a></li>
+                <li><a href="/teacher/tests/manage">Tests</a></li>
+                <li><a href="/teacher/live-classes" class="active">Live Classes</a></li>
+                <li><a href="#attendance">Attendance</a></li>
+            </ul>
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">{{ session.get('name', 'Teacher') }}</div>
+                    <div class="user-role">Teacher</div>
+                </div>
+                <div class="user-avatar">{{ session.get('name', 'T')[0] }}</div>
+                <a href="/logout" class="btn btn-secondary" style="padding: 8px 15px;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-page">
+        <div class="container">
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    <h1>Live Classes</h1>
+                    <p>Create and manage live online classes</p>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 30px;">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-plus-circle" style="color: var(--success);"></i> Start New Live Class</h3>
+                </div>
+                <form action="/teacher/live-class/create" method="POST" style="padding: 20px;">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 15px; align-items: end;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-size: 0.9rem;">Class Title</label>
+                            <input type="text" name="title" placeholder="e.g., Mathematics Lecture" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-size: 0.9rem;">Subject</label>
+                            <select name="subject_id" required>
+                                <option value="" disabled selected>Select Subject</option>
+                                {% for subject in subjects %}
+                                <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-size: 0.9rem;">Max Students</label>
+                            <input type="number" name="max_students" value="10" min="1" max="100" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white;">
+                        </div>
+                        <button type="submit" class="btn btn-success" style="padding: 12px 25px;">
+                            <i class="fas fa-video"></i> Start Class
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-history" style="color: var(--accent);"></i> Your Live Classes</h3>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Subject</th>
+                                <th>Code</th>
+                                <th>Students</th>
+                                <th>Status</th>
+                                <th>Started</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lc in classes %}
+                            <tr>
+                                <td>{{ lc.title }}</td>
+                                <td>{{ lc.subject_name }}</td>
+                                <td><span style="font-family: monospace; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 5px;">{{ lc.class_code }}</span></td>
+                                <td>{{ lc.student_count }} / {{ lc.max_students }}</td>
+                                <td>
+                                    {% if lc.active %}
+                                    <span class="status-badge status-present">Live</span>
+                                    {% else %}
+                                    <span class="status-badge status-absent">Ended</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ lc.started_at.strftime('%Y-%m-%d %H:%M') if lc.started_at else 'N/A' }}</td>
+                                <td>
+                                    <a href="/live-class/{{ lc.id }}" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">Open</a>
+                                    {% if lc.active %}
+                                    <a href="/teacher/live-class/{{ lc.id }}/end" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem; margin-left: 5px;">End</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: var(--text-secondary);">No live classes yet</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

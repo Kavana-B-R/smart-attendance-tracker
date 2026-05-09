@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ video.title }} - Smart Attendance Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation"></div>
+
+    <!-- Video Player Page -->
+    <div class="dashboard-page" style="padding-top: 100px;">
+        <div class="container">
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+                <!-- Video Player -->
+                <div>
+                    <div class="card" style="padding: 0; overflow: hidden;">
+                        <video class="video-player" controls style="width: 100%; max-height: 500px; background: #000;">
+                            <source src="{{ url_for('static', filename='uploads/videos/' + video.filename) }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <input type="hidden" id="videoId" value="{{ video.id }}">
+                    </div>
+                    
+                    <div class="card" style="margin-top: 30px;">
+                        <h2 style="margin-bottom: 15px;">{{ video.title }}</h2>
+                        <span class="video-topic">{{ video.topic }}</span>
+                        <p style="margin-top: 20px; color: var(--text-secondary); line-height: 1.8;">{{ video.description }}</p>
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--glass-border);">
+                            <span style="color: var(--text-secondary);">
+Uploaded on Recent
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div>
+                    <div class="card">
+                        <h3 style="margin-bottom: 20px;"><i class="fas fa-list"></i> Video Progress</h3>
+                        <div id="progressInfo" style="text-align: center; padding: 20px;">
+                            <div style="font-size: 2rem; color: var(--accent); margin-bottom: 10px;">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                            <p>Tracking your progress...</p>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-top: 20px;">
+                        <h3 style="margin-bottom: 20px;"><i class="fas fa-video"></i> More Videos</h3>
+                        <a href="/videos" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                            Browse All Videos
+                        </a>
+                    </div>
+
+                    <div class="card" style="margin-top: 20px;">
+                        <h3 style="margin-bottom: 20px;"><i class="fas fa-clipboard-check"></i> Take a Test</h3>
+<a href="/student/tests" class="btn btn-success" style="width: 100%; justify-content: center;">
+    View Tests
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <a href="/videos" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Videos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot-widget">
+        <button class="chatbot-toggle"><i class="fas fa-robot"></i></button>
+        <div class="chatbot-container">
+            <div class="chatbot-header">
+                <span class="chatbot-title"><i class="fas fa-robot"></i> AI Assistant</span>
+                <button class="chatbot-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chatbot-messages">
+                <div class="message bot">Need help with this video? Ask me!</div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" placeholder="Type your message...">
+                <button><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+

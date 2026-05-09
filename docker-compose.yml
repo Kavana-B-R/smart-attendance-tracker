@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  flask:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=sqlite:///attendance.db  # Or postgresql://
+
+  db:
+    image: sqlite  # Or mysql:8.0
+    volumes:
+      - ./attendance.db:/attendance.db
+    ports:
+      - "5432:5432"  # MySQL or PostgreSQL port
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./templates:/usr/share/nginx/html/templates
+      - ./static:/usr/share/nginx/html/static
+
+# Docker build context assumes Dockerfile
+# Create Dockerfile for Flask:
+# FROM python:3.11-slim
+# WORKDIR /app
+# COPY requirements.txt .
+# RUN pip install -r requirements.txt
+# COPY . .
+# CMD ["python", "app.py"]
+

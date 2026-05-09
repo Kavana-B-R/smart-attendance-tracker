@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Test - Smart Attendance Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+                SmartAttend
+            </a>
+            <ul class="nav-links">
+                <li><a href="/teacher/dashboard">Dashboard</a></li>
+                <li><a href="/teacher/videos/manage">Videos</a></li>
+                <li><a href="/teacher/tests/manage">Tests</a></li>
+            </ul>
+            <div class="user-info">
+                <a href="/logout" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Create Test Page -->
+    <div class="dashboard-page" style="padding-top: 120px;">
+        <div class="container">
+            <div style="max-width: 900px; margin: 0 auto;">
+                <div class="card">
+                    <h2 style="margin-bottom: 30px; text-align: center;">
+                        <i class="fas fa-clipboard-plus" style="color: var(--success);"></i> Create New MCQ Test
+                    </h2>
+
+                    <form method="POST" id="testForm">
+                        <!-- Test Details -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                            <div class="form-group">
+                                <label><i class="fas fa-book"></i> Subject</label>
+                                <select name="subject_id" required>
+                                    <option value="">Select a subject</option>
+                                    {% for subject in subjects %}
+                                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-tag"></i> Topic</label>
+                                <input type="text" name="topic" placeholder="e.g., Algebra Basics" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-heading"></i> Test Title</label>
+                            <input type="text" name="title" placeholder="Enter test title" required>
+                        </div>
+
+                        <!-- Questions Section -->
+                        <div id="questionsContainer">
+                            <!-- Question 1 -->
+                            <div class="question-form">
+                                <div class="question-number">Question 1</div>
+                                <input type="text" class="question-input" name="question[]" placeholder="Enter your question" required>
+                                
+                                <div class="options-grid">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="font-weight: 600; color: var(--accent);">A.</span>
+                                        <input type="text" class="question-input" name="option_a[]" placeholder="Option A" required style="margin-bottom: 0;">
+                                        <input type="radio" name="correct_answer[]" value="A" required>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="font-weight: 600; color: var(--accent);">B.</span>
+                                        <input type="text" class="question-input" name="option_b[]" placeholder="Option B" required style="margin-bottom: 0;">
+                                        <input type="radio" name="correct_answer[]" value="B">
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="font-weight: 600; color: var(--accent);">C.</span>
+                                        <input type="text" class="question-input" name="option_c[]" placeholder="Option C" required style="margin-bottom: 0;">
+                                        <input type="radio" name="correct_answer[]" value="C">
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="font-weight: 600; color: var(--accent);">D.</span>
+                                        <input type="text" class="question-input" name="option_d[]" placeholder="Option D" required style="margin-bottom: 0;">
+                                        <input type="radio" name="correct_answer[]" value="D">
+                                    </div>
+                                </div>
+                                <p style="margin-top: 15px; font-size: 0.85rem; color: var(--text-secondary);">
+                                    <i class="fas fa-check-circle"></i> Select the radio button next to the correct answer
+                                </p>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-secondary" onclick="addQuestion()" style="margin-bottom: 30px; width: 100%;">
+                            <i class="fas fa-plus"></i> Add Another Question
+                        </button>
+
+                        <div style="display: flex; gap: 15px;">
+                            <a href="/teacher/tests/manage" class="btn btn-secondary" style="flex: 1;">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success" style="flex: 1;">
+                                <i class="fas fa-save"></i> Create Test
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot-widget">
+        <button class="chatbot-toggle"><i class="fas fa-robot"></i></button>
+        <div class="chatbot-container">
+            <div class="chatbot-header">
+                <span class="chatbot-title"><i class="fas fa-robot"></i> AI Assistant</span>
+                <button class="chatbot-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chatbot-messages">
+                <div class="message bot">Creating a test? Make sure each question has one correct answer!</div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" placeholder="Type your message...">
+                <button><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let questionCount = 1;
+
+        function addQuestion() {
+            questionCount++;
+            const container = document.getElementById('questionsContainer');
+            
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-form';
+            questionDiv.innerHTML = `
+                <div class="question-number">Question ${questionCount}</div>
+                <input type="text" class="question-input" name="question[]" placeholder="Enter your question" required>
+                
+                <div class="options-grid">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-weight: 600; color: var(--accent);">A.</span>
+                        <input type="text" class="question-input" name="option_a[]" placeholder="Option A" required style="margin-bottom: 0;">
+                        <input type="radio" name="correct_answer[]" value="A" required>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-weight: 600; color: var(--accent);">B.</span>
+                        <input type="text" class="question-input" name="option_b[]" placeholder="Option B" required style="margin-bottom: 0;">
+                        <input type="radio" name="correct_answer[]" value="B">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-weight: 600; color: var(--accent);">C.</span>
+                        <input type="text" class="question-input" name="option_c[]" placeholder="Option C" required style="margin-bottom: 0;">
+                        <input type="radio" name="correct_answer[]" value="C">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-weight: 600; color: var(--accent);">D.</span>
+                        <input type="text" class="question-input" name="option_d[]" placeholder="Option D" required style="margin-bottom: 0;">
+                        <input type="radio" name="correct_answer[]" value="D">
+                    </div>
+                </div>
+                <p style="margin-top: 15px; font-size: 0.85rem; color: var(--text-secondary);">
+                    <i class="fas fa-check-circle"></i> Select the radio button next to the correct answer
+                </p>
+            `;
+            
+            container.appendChild(questionDiv);
+        }
+    </script>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+

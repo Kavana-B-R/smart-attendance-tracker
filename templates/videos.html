@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Lectures - Smart Attendance Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+                SmartAttend
+            </a>
+            <ul class="nav-links">
+                <li><a href="/student/dashboard">Dashboard</a></li>
+                <li><a href="/videos" class="active">Videos</a></li>
+<li><a href="/student/tests">Tests</a></li>
+            </ul>
+            <div class="user-info">
+                <a href="/logout" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Videos Page -->
+    <div class="dashboard-page">
+        <div class="container">
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    <h1>Video Lectures</h1>
+                    <p>Watch your course videos and track your progress</p>
+                </div>
+            </div>
+
+            <!-- Video Grid -->
+            <div class="video-grid">
+                {% for video in videos %}
+                <div class="video-card">
+                    <div class="video-thumbnail">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+                    <div class="video-info">
+                        <span class="video-topic">{{ video.topic }}</span>
+                        <h4 class="video-title">{{ video.title }}</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 10px 0;">{{ video.description }}</p>
+                        <div class="video-meta">
+{{ video.upload_date|default('Recent')|truncate(10, true, '') }}
+                            <span><i class="fas fa-eye"></i> {{ video.views }} views</span>
+                        </div>
+                        <a href="/video/{{ video.id }}" class="btn btn-primary" style="margin-top: 15px; width: 100%; justify-content: center;">
+                            <i class="fas fa-play"></i> Watch Now
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-state" style="grid-column: 1/-1;">
+                    <div class="empty-icon"><i class="fas fa-video-slash"></i></div>
+                    <h3>No Videos Available</h3>
+                    <p>Your teacher hasn't uploaded any videos yet.</p>
+                    <a href="/student/dashboard" class="btn btn-primary" style="margin-top: 20px;">Back to Dashboard</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot-widget">
+        <button class="chatbot-toggle"><i class="fas fa-robot"></i></button>
+        <div class="chatbot-container">
+            <div class="chatbot-header">
+                <span class="chatbot-title"><i class="fas fa-robot"></i> AI Assistant</span>
+                <button class="chatbot-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chatbot-messages">
+                <div class="message bot">Hello! Need help finding a video? Just ask!</div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" placeholder="Type your message...">
+                <button><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+

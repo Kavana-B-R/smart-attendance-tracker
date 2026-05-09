@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance - Smart Attendance Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/student/dashboard" class="logo">
+                <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+                SmartAttend
+            </a>
+            <ul class="nav-links">
+                <li><a href="/student/dashboard">Dashboard</a></li>
+                <li><a href="/videos">Videos</a></li>
+                <li><a href="/student/tests">Tests</a></li>
+                <li><a href="/student/attendance" class="active">Attendance</a></li>
+            </ul>
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">{{ session.get('username', 'Student') }}</div>
+                    <div class="user-role">Student</div>
+                </div>
+                <div class="user-avatar">{{ session.get('username', 'S')[0] }}</div>
+                <a href="/logout" class="btn btn-secondary" style="padding: 8px 15px;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Attendance Page -->
+    <div class="dashboard-page">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    <h1>Mark Attendance</h1>
+                    <p>Use face recognition to mark your attendance for today's class</p>
+                </div>
+            </div>
+
+            <!-- Face Recognition Attendance -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-face-smile-beam" style="color: var(--success);"></i> Mark Attendance by Face Recognition</h3>
+                    <p style="color: var(--text-secondary);">Look at the camera and click Mark Attendance. Good lighting recommended.</p>
+                </div>
+                <div class="face-capture">
+                    <div class="video-preview">
+                        <video id="videoPreview" autoplay playsinline muted></video>
+                        <canvas id="captureCanvas" style="display: none;"></canvas>
+                    </div>
+                    <div id="captureStatus" style="margin: 15px 0; font-weight: 500;"></div>
+                    <button id="captureBtn" class="btn btn-primary capture-btn">
+                        <i class="fas fa-camera"></i> Mark Attendance
+                    </button>
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px; font-size: 0.9rem;">
+                        <i class="fas fa-info-circle" style="color: var(--warning);"></i>
+                        Tips: Good lighting, face camera directly, remove glasses if possible
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- Recent Attendance -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-calendar-check" style="color: var(--accent);"></i> Recent Attendance</h3>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for att in recent_attendance %}
+                            <tr>
+                                <td>{{ att.date_str }}</td>
+                                <td>{{ att.subject_name }}</td>
+                                <td><span class="{{ att.status_class }}">{{ att.status }}</span></td>
+
+                                <td>{{ att.time_str }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--text-secondary);">No attendance records yet. Mark your first attendance!</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot-widget">
+        <button class="chatbot-toggle"><i class="fas fa-robot"></i></button>
+        <div class="chatbot-container">
+            <div class="chatbot-header">
+                <span class="chatbot-title"><i class="fas fa-robot"></i> AI Attendance Helper</span>
+                <button class="chatbot-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chatbot-messages">
+                <div class="message bot">Ready to mark attendance? Make sure you select a subject first and have good lighting!</div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" placeholder="Ask about attendance...">
+                <button><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Attendance functionality
+
+
+        const captureBtn = document.getElementById('captureBtn');
+
+        const videoPreview = document.getElementById('videoPreview');
+        const captureCanvas = document.getElementById('captureCanvas');
+        const captureStatus = document.getElementById('captureStatus');
+
+        let mediaRecorder;
+        let stream;
+
+
+
+        async function initCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 320, height: 240, facingMode: 'user' } 
+                });
+                videoPreview.srcObject = stream;
+            } catch (err) {
+                captureStatus.textContent = 'Camera access denied or not available';
+                captureStatus.style.color = '#ff6b6b';
+            }
+        }
+
+        async function initCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 320, height: 240, facingMode: 'user' } 
+                });
+                videoPreview.srcObject = stream;
+            } catch (err) {
+                captureStatus.textContent = 'Camera access denied or not available';
+                captureStatus.style.color = '#ff6b6b';
+            }
+        }
+
+        initCamera();
+
+        captureBtn.addEventListener('click', async function() {
+            captureStatus.textContent = 'Capturing face...';
+            captureStatus.style.color = 'var(--warning)';
+            this.disabled = true;
+
+            // Capture frame
+            const context = captureCanvas.getContext('2d');
+            captureCanvas.width = videoPreview.videoWidth;
+            captureCanvas.height = videoPreview.videoHeight;
+            context.drawImage(videoPreview, 0, 0);
+
+            // Convert to base64
+            const faceData = captureCanvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+
+            try {
+                const response = await fetch('/mark_attendance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        face_data: faceData
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    captureStatus.textContent = '✅ Attendance marked successfully!';
+                    captureStatus.style.color = 'var(--success)';
+                } else {
+                    captureStatus.textContent = '❌ ' + (result.message || 'Recognition failed');
+                    captureStatus.style.color = '#ff6b6b';
+                }
+            } catch (error) {
+                captureStatus.textContent = 'Error marking attendance';
+                captureStatus.style.color = '#ff6b6b';
+            }
+
+            setTimeout(() => {
+                captureStatus.textContent = '';
+                captureBtn.disabled = false;
+            }, 3000);
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>
+

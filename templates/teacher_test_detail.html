@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Test Analytics - {{ test.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav>
+        <a href="/teacher/tests" class="back-btn">
+            ← All Tests
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>{{ test.title }}</h1>
+            <p>{{ test.topic }} - {{ test.question_count }} questions</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-number">{{ attempts }}</div>
+                <div class="stat-desc">Total Attempts</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">{{ "%.1f"|format(avg_score * 100) }}%</div>
+                <div class="stat-desc">Average Score</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">{{ top_score }}</div>
+                <div class="stat-desc">Top Score</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">{{ pass_rate|round(1) }}%</div>
+                <div class="stat-desc">Pass Rate (>60%)</div>
+            </div>
+        </div>
+
+        <!-- Students Table -->
+        <div class="card">
+            <h3>Student Results</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Score</th>
+                            <th>Percentage</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <td>{{ result.student_name }}</td>
+                            <td>{{ result.score }}/{{ result.total }}</td>
+                            <td>
+                                <span class="status-badge {{ 'status-present' if (result.percentage >= 60) else 'status-absent' }}">
+                                    {{ "%.1f"|format(result.percentage) }}%
+                                </span>
+                            </td>
+                            <td>{{ result.date }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Improvement Graphs -->
+        <div class="card">
+            <h3>Student Improvement Trends</h3>
+            <canvas id="improvementChart" width="800" height="400"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for improvement graph (replace with API)
+        const ctx = document.getElementById('improvementChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Test 1', 'Test 2', 'Test 3', 'Test 4'],
+                datasets: [
+                    {
+                        label: 'Alice (Student 1)',
+                        data: [75, 82, 88, 92],
+                        borderColor: '#00d9a5',
+                        backgroundColor: 'rgba(0, 217, 165, 0.1)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Bob (Student 2)',
+                        data: [60, 65, 70, 78],
+                        borderColor: '#e94560',
+                        backgroundColor: 'rgba(233, 69, 96, 0.1)',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: { display: true, text: 'Score (%)' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

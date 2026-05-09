@@ -1,0 +1,42 @@
+# Face Recognition Attendance System - Complete Requirements (MVP)
+# Install: pip install -r requirements.txt
+
+# Core Flask
+Flask>=3.0.0
+Flask-CORS>=4.0.0
+Flask-SocketIO>=5.3.6
+Flask-Login>=0.6.3
+Werkzeug>=3.0.0
+
+# Database & ORM (spec: SQLAlchemy + SQLite/MySQL)
+SQLAlchemy>=2.0.0
+mysql-connector-python>=8.2.0
+pymongo>=4.6.0  # For videos/tests if keeping hybrid
+
+# Computer Vision & AI (spec)
+opencv-python-headless>=4.8.0
+face-recognition>=1.3.0
+dlib>=19.24.0
+numpy>=1.26.0
+Pillow>=10.0.0
+
+# Analytics & Reports (spec: Pandas, PDF/Excel)
+pandas>=2.0.0
+reportlab>=4.0.0  # PDF
+openpyxl>=3.1.0   # Excel
+
+# Utilities
+python-dateutil>=2.8.0
+cmake  # For dlib/face_recognition
+scikit-learn>=1.3.0
+alembic>=1.13.0  # Migrations
+
+# Dev/Testing
+pytest>=7.4.0
+
+# Notes:
+# - Python 3.10+ recommended
+# - For production: Add gunicorn, redis (SocketIO)
+# - Flutter mobile separate: flutter pub get
+# - Run: pip install -r requirements.txt
+

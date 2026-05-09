@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Video - Smart Attendance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/teacher/dashboard" class="logo">SmartAttend</a>
+            <a href="/teacher/dashboard" class="btn btn-secondary">Dashboard</a>
+            <a href="/logout" class="btn btn-secondary">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Upload Lecture Video</h1>
+        </div>
+
+        <div class="card">
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Video Title</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="videoFile">Select Video File (MP4 recommended)</label>
+                    <input type="file" id="videoFile" name="video" accept="video/*" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Upload Video
+                    </button>
+                </div>
+            </form>
+            <div id="progress" class="progress-bar" style="display: none;">
+                <div class="progress-fill"></div>
+            </div>
+            <div id="uploadStatus"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const progress = document.getElementById('progress');
+            const status = document.getElementById('uploadStatus');
+            
+            progress.style.display = 'block';
+            
+            try {
+                const response = await fetch('/upload_video', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                progress.style.display = 'none';
+                
+                if (result.success) {
+                    status.innerHTML = `<div class="alert alert-success">Video uploaded successfully! <a href="/videos">View videos</a></div>`;
+                } else {
+                    status.innerHTML = `<div class="alert alert-error">${result.message || 'Upload failed'}</div>`;
+                }
+            } catch (error) {
+                progress.style.display = 'none';
+                status.innerHTML = '<div class="alert alert-error">Upload failed. Please try again.</div>';
+            }
+        });
+    </script>
+</body>
+</html>
+

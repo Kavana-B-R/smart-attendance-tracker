@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Smart Attendance Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation"></div>
+
+    <!-- Tab Warning Overlay -->
+    <div class="tab-warning">
+        <div class="tab-warning-content">
+            <div class="tab-warning-icon">⚠️</div>
+            <h2>Stay Focused!</h2>
+            <p>Please don't switch tabs during class. This activity has been logged.</p>
+            <button class="btn btn-primary" onclick="hideTabWarning()">I Understand</button>
+        </div>
+    </div>
+
+    <!-- Activity Indicator -->
+    <div class="activity-indicator">
+        <div class="activity-dot"></div>
+        <span class="activity-text">Active</span>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+                SmartAttend
+            </a>
+            <ul class="nav-links">
+                <li><a href="#" class="active">Dashboard</a></li>
+                <li><a href="/videos">Videos</a></li>
+<li><a href="/student/tests">Tests</a></li>
+<li><a href="/student/live-classes">Live Classes</a></li>
+<li><a href="/student/attendance">Attendance</a></li>
+            </ul>
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">{{ session.get('name', 'Student') }}</div>
+                    <div class="user-role">Student</div>
+                </div>
+                <div class="user-avatar">{{ session.get('name', 'S')[0] }}</div>
+                <a href="/logout" class="btn btn-secondary" style="padding: 8px 15px;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Page -->
+    <div class="dashboard-page">
+        <div class="container">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    <h1>Welcome, {{ session.get('name', 'Student') }}!</h1>
+                    <p>Track your attendance, videos, and test scores</p>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-icon attendance"><i class="fas fa-calendar-check"></i></div>
+                    <div class="stat-number" data-target="94" data-suffix="%">0%</div>
+                    <div class="stat-desc">Attendance Rate</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon screen"><i class="fas fa-clock"></i></div>
+                    <div class="stat-number" data-target="{{ data.screen_time or 0 }}" data-suffix="h" data-time="true">0h</div>
+                    <div class="stat-desc">Total Screen Time</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon videos"><i class="fas fa-video"></i></div>
+                    <div class="stat-number" data-target="{{ data.videos|length if data.videos else 0 }}">0</div>
+                    <div class="stat-desc">Videos Watched</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon tests"><i class="fas fa-clipboard-check"></i></div>
+                    <div class="stat-number" data-target="85" data-suffix="%">0%</div>
+                    <div class="stat-desc">Average Test Score</div>
+                </div>
+            </div>
+
+            <!-- Face Recognition Attendance -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-face-smile" style="color: var(--accent);"></i> Mark Attendance</h3>
+                </div>
+                <div class="face-capture">
+                    <div class="video-preview">
+                        <video id="videoPreview" autoplay playsinline></video>
+                        <canvas id="captureCanvas" style="display: none;"></canvas>
+                    </div>
+                    <input type="hidden" id="subjectId" value="1">
+                    <div id="captureStatus"></div>
+                    <button id="captureBtn" class="btn btn-primary capture-btn">
+                        <i class="fas fa-camera"></i> Mark Attendance
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+                <!-- Attendance Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-calendar-alt" style="color: var(--accent);"></i> Attendance by Subject</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Present</th>
+                                    <th>Total</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for subject in data.attendance %}
+                                <tr>
+                                    <td>{{ subject.subject_name }}</td>
+                                    <td>{{ subject.present }}</td>
+                                    <td>{{ subject.total }}</td>
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <div class="progress-bar" style="flex: 1;">
+{{ 'high' if (subject.total > 0 and (subject.present / subject.total * 100) >= 75) else 'medium' if (subject.total > 0 and (subject.present / subject.total * 100) >= 50) else 'low' }}
+                                            </div>
+{{ "%.0f"|format((subject.present / subject.total * 100) if subject.total > 0 else 0) if subject.total > 0 else '0' }}%
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--text-secondary);">No attendance data available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recent Test Results -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-star" style="color: var(--warning);"></i> Recent Test Scores</h3>
+<a href="/student/tests" class="btn btn-secondary" style="padding: 8px 15px; font-size: 0.85rem;">View All</a>
+                    </div>
+                    <div>
+                        {% for result in data.test_results %}
+                        <div style="padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 10px;">
+                            <div style="font-weight: 600; margin-bottom: 5px;">{{ result.title }}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">{{ result.topic }}</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+{{ 'status-present' if (result.total_questions > 0 and (result.score / result.total_questions * 100) >= 60) else 'status-absent' }}
+                                    {{ result.score }}/{{ result.total_questions }}
+                                </span>
+{{ result.attempted_at or '' }}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="empty-state" style="padding: 30px;">
+                            <p>No test results yet</p>
+<a href="/student/tests" class="btn btn-primary" style="margin-top: 15px;">Take a Test</a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Videos -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-video" style="color: var(--warning);"></i> Recent Video Lectures</h3>
+                    <a href="/videos" class="btn btn-secondary" style="padding: 8px 15px; font-size: 0.85rem;">View All</a>
+                </div>
+                <div class="video-grid">
+                    {% for video in data.videos %}
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="video-info">
+                            <span class="video-topic">{{ video.topic }}</span>
+                            <h4 class="video-title">{{ video.title }}</h4>
+                            <div class="video-meta">
+                                <span><i class="fas fa-calendar"></i> {{ video.upload_date if video.upload_date else 'Recent' }}</span>
+</xai:function_call»
+
+<xai:function_call name="edit_file">
+<parameter name="path">templates/student_dashboard.html
+                                <span>
+                                    {% if video.completed %}
+                                    <i class="fas fa-check-circle" style="color: var(--success);"></i> Completed
+                                    {% else %}
+                                    <i class="fas fa-eye"></i> Not watched
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <a href="/video/{{ video.id }}" class="btn btn-primary" style="margin-top: 15px; width: 100%; justify-content: center;">
+                                <i class="fas fa-play"></i> Watch Now
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-icon"><i class="fas fa-video-slash"></i></div>
+                        <h3>No Videos Available</h3>
+                        <p>Your teacher hasn't uploaded any videos yet.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot-widget">
+        <button class="chatbot-toggle"><i class="fas fa-robot"></i></button>
+        <div class="chatbot-container">
+            <div class="chatbot-header">
+                <span class="chatbot-title"><i class="fas fa-robot"></i> AI Assistant</span>
+                <button class="chatbot-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chatbot-messages">
+                <div class="message bot">Hello! I'm here to help. Ask me about attendance, videos, tests, or how to navigate the platform.</div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" placeholder="Type your message...">
+                <button><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+

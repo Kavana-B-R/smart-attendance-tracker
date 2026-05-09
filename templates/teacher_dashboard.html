@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - Smart Attendance Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+                SmartAttend
+            </a>
+            <ul class="nav-links">
+                <li><a href="#" class="active">Dashboard</a></li>
+                <li><a href="/teacher/videos/manage">Videos</a></li>
+                <li><a href="/teacher/tests/manage">Tests</a></li>
+                <li><a href="/teacher/live-classes">Live Classes</a></li>
+                <li><a href="#attendance">Attendance</a></li>
+            </ul>
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">{{ session.get('name', 'Teacher') }}</div>
+                    <div class="user-role">Teacher</div>
+                </div>
+                <div class="user-avatar">{{ session.get('name', 'T')[0] }}</div>
+                <a href="/logout" class="btn btn-secondary" style="padding: 8px 15px;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Page -->
+    <div class="dashboard-page">
+        <div class="container">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    <h1>Teacher Dashboard</h1>
+                    <p>Manage your class, track attendance, and create content</p>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <a href="/teacher/video/upload" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Upload Video
+                    </a>
+                    <a href="/teacher/test/create" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Create Test
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-icon attendance"><i class="fas fa-users"></i></div>
+                    <div class="stat-number" data-target="{{ data.students|length if data.students else 0 }}">0</div>
+                    <div class="stat-desc">Total Students</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon screen"><i class="fas fa-book"></i></div>
+                    <div class="stat-number" data-target="{{ data.subjects|length if data.subjects else 0 }}">0</div>
+                    <div class="stat-desc">Subjects</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon videos"><i class="fas fa-video"></i></div>
+                    <div class="stat-number" data-target="12">0</div>
+                    <div class="stat-desc">Total Videos</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon tests"><i class="fas fa-clipboard-list"></i></div>
+                    <div class="stat-number" data-target="8">0</div>
+                    <div class="stat-desc">MCQ Tests</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+                <!-- Attendance Overview -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-calendar-check" style="color: var(--accent);"></i> Attendance Overview</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Students</th>
+                                    <th>Present</th>
+                                    <th>Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stat in data.attendance_stats %}
+                                <tr>
+                                    <td>{{ stat.subject_name }}</td>
+                                    <td>{{ stat.students_count or 0 }}</td>
+                                    <td>{{ stat.present_count or 0 }}</td>
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <div class="progress-bar" style="flex: 1;">
+                                                {% set rate = ((stat.present_count / stat.total_count * 100) if stat.total_count > 0 else 0) %}
+                                                <div class="progress-fill {{ 'high' if rate >= 75 else 'medium' if rate >= 50 else 'low' }}" style="width: {{ rate }}%;"></div>
+                                            </div>
+                                            <span>{{ "%.0f"|format(rate) }}%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--text-secondary);">No attendance data available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-history" style="color: var(--success);"></i> Recent Activity</h3>
+                    </div>
+                    <div>
+                        {% for activity in data.recent_activity %}
+                        <div style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 10px; margin-bottom: 10px;">
+                            <div style="font-weight: 600; font-size: 0.9rem;">{{ activity.name }}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                                {{ activity.activity_type }} - {{ activity.details }}
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">
+                                {{ activity.timestamp.strftime('%Y-%m-%d %H:%M') if activity.timestamp else '' }}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="empty-state" style="padding: 20px;">
+                            <p>No recent activity</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Results -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-chart-bar" style="color: var(--warning);"></i> Test Results Overview</h3>
+                    <a href="/teacher/tests/manage" class="btn btn-secondary" style="padding: 8px 15px; font-size: 0.85rem;">Manage Tests</a>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Test Title</th>
+                                <th>Topic</th>
+                                <th>Student</th>
+                                <th>Score</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in data.test_results %}
+                            <tr>
+                                <td>{{ result.title }}</td>
+                                <td><span class="video-topic">{{ result.topic }}</span></td>
+                                <td>{{ result.student_name }}</td>
+                                <td>
+                                    <span class="status-badge {{ 'status-present' if ((result.score / result.total_questions * 100) >= 60) else 'status-absent' }}">
+                                        {{ result.score }}/{{ result.total_questions }}
+                                    </span>
+                                </td>
+                                <td>{{ result.attempted_at.strftime('%Y-%m-%d') if result.attempted_at else '' }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-secondary);">No test results yet</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-bolt" style="color: var(--accent);"></i> Quick Actions</h3>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+                    <a href="/teacher/video/upload" style="text-decoration: none;">
+                        <div style="padding: 30px; background: rgba(255,255,255,0.03); border-radius: 15px; text-align: center; transition: all 0.3s; cursor: pointer;" class="action-card">
+                            <div style="font-size: 2.5rem; color: var(--accent); margin-bottom: 15px;"><i class="fas fa-video"></i></div>
+                            <div style="font-weight: 600;">Upload Video</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px;">Add lecture video</div>
+                        </div>
+                    </a>
+                    <a href="/teacher/test/create" style="text-decoration: none;">
+                        <div style="padding: 30px; background: rgba(255,255,255,0.03); border-radius: 15px; text-align: center; transition: all 0.3s; cursor: pointer;" class="action-card">
+                            <div style="font-size: 2.5rem; color: var(--success); margin-bottom: 15px;"><i class="fas fa-clipboard-plus"></i></div>
+                            <div style="font-weight: 600;">Create Test</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px;">Add MCQ test</div>
+                        </div>
+                    </a>
+                    <a href="/teacher/live-classes" style="text-decoration: none;">
+                        <div style="padding: 30px; background: rgba(255,255,255,0.03); border-radius: 15px; text-align: center; transition: all 0.3s; cursor: pointer;" class="action-card">
+                            <div style="font-size: 2.5rem; color: #e74c3c; margin-bottom: 15px;"><i class="fas fa-broadcast-tower"></i></div>
+                            <div style="font-weight: 600;">Live Class</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px;">Start streaming</div>
+                        </div>
+                    </a>
+                    <a href="/teacher/videos/manage" style="text-decoration: none;">
+                        <div style="padding: 30px; background: rgba(255,255,255,0.03); border-radius: 15px; text-align: center; transition: all 0.3s; cursor: pointer;" class="action-card">
+                            <div style="font-size: 2.5rem; color: var(--warning); margin-bottom: 15px;"><i class="fas fa-tasks"></i></div>
+                            <div style="font-weight: 600;">Manage Videos</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px;">View watch history</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot-widget">
+        <button class="chatbot-toggle"><i class="fas fa-robot"></i></button>
+        <div class="chatbot-container">
+            <div class="chatbot-header">
+                <span class="chatbot-title"><i class="fas fa-robot"></i> AI Assistant</span>
+                <button class="chatbot-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chatbot-messages">
+                <div class="message bot">Hello! I'm here to help teachers. Ask me about managing videos, creating tests, viewing attendance reports, or any other feature.</div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" placeholder="Type your message...">
+                <button><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .action-card:hover {
+            background: rgba(255,255,255,0.08) !important;
+            transform: translateY(-5px);
+        }
+    </style>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ live_class.title }} - Live Class</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .live-room { display: grid; grid-template-columns: 3fr 1fr; gap: 20px; padding: 20px; }
+        .video-area { background: #000; border-radius: 15px; min-height: 500px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .video-area video { width: 100%; height: 100%; border-radius: 15px; object-fit: cover; }
+        .sidebar { display: flex; flex-direction: column; gap: 20px; }
+        .student-list { background: rgba(255,255,255,0.03); border-radius: 15px; padding: 20px; max-height: 400px; overflow-y: auto; }
+        .student-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .controls { display: flex; gap: 10px; justify-content: center; padding: 20px; }
+        .control-btn { width: 50px; height: 50px; border-radius: 50%; border: none; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+        .control-btn.red { background: #e74c3c; color: white; }
+        .control-btn.green { background: #2ecc71; color: white; }
+        .control-btn.gray { background: rgba(255,255,255,0.1); color: white; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+                SmartAttend
+            </a>
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">{{ session.get('name', 'User') }}</div>
+                    <div class="user-role">{{ 'Teacher' if is_teacher else 'Student' }}</div>
+                </div>
+                <a href="/logout" class="btn btn-secondary" style="padding: 8px 15px;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-page">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <h1>{{ live_class.title }}</h1>
+                    <p style="color: var(--text-secondary);">
+                        {{ subject.name if subject else 'Unknown Subject' }} | 
+                        Code: <span style="font-family: monospace; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 5px;">{{ live_class.class_code }}</span> |
+                        Teacher: {{ teacher.name if teacher else 'Unknown' }}
+                    </p>
+                </div>
+                {% if live_class.active %}
+                <span class="status-badge status-present" style="font-size: 1rem; padding: 8px 16px;"><i class="fas fa-circle" style="font-size: 0.6rem; margin-right: 5px;"></i> LIVE</span>
+                {% else %}
+                <span class="status-badge status-absent" style="font-size: 1rem; padding: 8px 16px;">Ended</span>
+                {% endif %}
+            </div>
+
+            <div class="live-room">
+                <div>
+                    <div class="video-area" id="videoArea">
+                        {% if is_teacher %}
+                        <video id="localVideo" autoplay muted playsinline></video>
+                        {% else %}
+                        <div style="text-align: center; color: var(--text-secondary);">
+                            <i class="fas fa-video" style="font-size: 4rem; margin-bottom: 20px;"></i>
+                            <p>Waiting for teacher to start stream...</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="controls">
+                        {% if is_teacher %}
+                        <button class="control-btn green" id="camBtn" onclick="toggleCam()"><i class="fas fa-video"></i></button>
+                        <button class="control-btn green" id="micBtn" onclick="toggleMic()"><i class="fas fa-microphone"></i></button>
+                        <a href="/teacher/live-class/{{ live_class.id }}/end" class="control-btn red"><i class="fas fa-phone-slash"></i></a>
+                        {% else %}
+                        <button class="control-btn green" id="joinBtn" onclick="joinClass()"><i class="fas fa-sign-in-alt"></i> Join</button>
+                        <button class="control-btn gray" id="camBtn" onclick="toggleCam()" style="display:none"><i class="fas fa-video"></i></button>
+                        <button class="control-btn gray" id="micBtn" onclick="toggleMic()" style="display:none"><i class="fas fa-microphone"></i></button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="sidebar">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-users" style="color: var(--accent);"></i> Students ({{ students|length }})</h3>
+                        </div>
+                        <div class="student-list">
+                            {% for student in students %}
+                            <div class="student-item">
+                                <span>{{ student.name }}</span>
+                                <span style="font-size: 0.75rem; color: var(--text-secondary);">{{ student.joined_at.strftime('%H:%M') if student.joined_at else '' }}</span>
+                            </div>
+                            {% else %}
+                            <div style="text-align: center; color: var(--text-secondary); padding: 20px;">No students yet</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let localStream = null;
+        let camOn = false;
+        let micOn = false;
+
+        async function toggleCam() {
+            const btn = document.getElementById('camBtn');
+            if (!camOn) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    localStream = stream;
+                    const video = document.getElementById('localVideo');
+                    if (video) video.srcObject = stream;
+                    camOn = true;
+                    btn.classList.remove('gray');
+                    btn.classList.add('green');
+                } catch (e) {
+                    alert('Could not access camera');
+                }
+            } else {
+                if (localStream) {
+                    localStream.getTracks().forEach(t => t.stop());
+                }
+                camOn = false;
+                btn.classList.remove('green');
+                btn.classList.add('gray');
+            }
+        }
+
+        async function toggleMic() {
+            const btn = document.getElementById('micBtn');
+            micOn = !micOn;
+            if (micOn) {
+                btn.classList.remove('gray');
+                btn.classList.add('green');
+            } else {
+                btn.classList.remove('green');
+                btn.classList.add('gray');
+            }
+        }
+
+        async function joinClass() {
+            const res = await fetch('/live-class/{{ live_class.id }}/join', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('joinBtn').style.display = 'none';
+                document.getElementById('camBtn').style.display = 'flex';
+                document.getElementById('micBtn').style.display = 'flex';
+                toggleCam();
+            } else {
+                alert(data.message);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            {% if is_teacher %}
+            toggleCam();
+            {% endif %}
+        });
+    </script>
+</body>
+</html>
+
